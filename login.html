@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ورود | هازارد رول‌پلی</title>
+  <meta name="description" content="ورود و ثبت‌نام در سایت هازارد رول‌پلی" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
+  <meta name="theme-color" content="#07070d" />
+</head>
+<body>
+
+  <div class="preloader" id="preloader">
+    <div class="preloader-logo"><img src="assets/logo.svg" alt="" width="86" height="86" /></div>
+    <div class="preloader-bar"><span></span></div>
+  </div>
+  <div class="progress-bar" id="progressBar"></div>
+
+  <header class="header">
+    <div class="container navbar">
+      <a href="index.html" class="brand">
+        <img src="assets/logo.svg" alt="Ha4ard" class="brand-logo-img" width="44" height="44" />
+        <span>Ha4ard<small>ROLEPLAY</small></span>
+      </a>
+      <nav class="nav-links" id="navLinks">
+        <a href="index.html">خانه</a>
+        <a href="store.html">فروشگاه</a>
+        <a href="rules.html">قوانین</a>
+        <a href="forum.html">انجمن</a>
+        <a href="apply.html">درخواست وایت‌لیست</a>
+        <a href="about.html">درباره ما</a>
+      </nav>
+      <div class="nav-cta">
+        <a href="index.html" class="btn btn-primary btn-sm">بازگشت</a>
+        <button class="nav-toggle" aria-label="منو" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <section class="page-hero">
+      <div class="container">
+        <span class="overline">🔐 حساب کاربری</span>
+        <h1>ورود / ثبت‌نام</h1>
+        <p>به خانواده هازارد بپیوند یا وارد حسابت شو.</p>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top: 30px;">
+      <div class="container auth-wrap">
+
+        <div class="auth-card reveal">
+          <div class="auth-tabs">
+            <button class="auth-tab active" type="button" data-tab="signin">ورود</button>
+            <button class="auth-tab" type="button" data-tab="signup">ثبت‌نام</button>
+          </div>
+
+          <div class="form-error" id="authError"></div>
+
+          <form id="signin-form" class="form-grid" style="grid-template-columns:1fr;" novalidate>
+            <div class="field full">
+              <label for="si-user">نام کاربری</label>
+              <input type="text" id="si-user" autocomplete="username" placeholder="username" required />
+            </div>
+            <div class="field full">
+              <label for="si-pass">رمز عبور</label>
+              <input type="password" id="si-pass" autocomplete="current-password" placeholder="••••••••" required />
+            </div>
+            <div class="field full">
+              <button type="submit" class="btn btn-primary" style="width:100%;">ورود به حساب</button>
+            </div>
+          </form>
+
+          <form id="signup-form" class="form-grid" style="grid-template-columns:1fr;display:none;" novalidate>
+            <div class="field full">
+              <label for="su-name">نام نمایشی</label>
+              <input type="text" id="su-name" placeholder="مثلاً: Ali_Gamer" required />
+            </div>
+            <div class="field full">
+              <label for="su-user">نام کاربری (انگلیسی)</label>
+              <input type="text" id="su-user" autocomplete="username" placeholder="username" required />
+            </div>
+            <div class="field full">
+              <label for="su-pass">رمز عبور</label>
+              <input type="password" id="su-pass" autocomplete="new-password" placeholder="حداقل ۶ کاراکتر" required minlength="6" />
+            </div>
+            <div class="field full">
+              <label for="su-pass2">تکرار رمز عبور</label>
+              <input type="password" id="su-pass2" autocomplete="new-password" placeholder="••••••••" required />
+            </div>
+            <div class="field full">
+              <button type="submit" class="btn btn-primary" style="width:100%;">ساخت حساب کاربری</button>
+            </div>
+          </form>
+
+          <div class="demo-cred">
+            <b>owner / Ha4ard@2026</b>
+            <div style="direction:rtl; margin-top:4px;">حساب مالک — بعد از ورود از پنل، رمزش را عوض کنید.</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <button class="to-top" id="toTop" aria-label="بازگشت به بالا">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+  </button>
+
+  <div class="toast" id="toast"><span></span></div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const err = document.getElementById("authError");
+      const showError = (msg) => {
+        err.textContent = msg;
+        err.classList.add("show");
+      };
+      const hideError = () => err.classList.remove("show");
+
+      const tabs = [...document.querySelectorAll(".auth-tab")];
+      const signinForm = document.getElementById("signin-form");
+      const signupForm = document.getElementById("signup-form");
+
+      tabs.forEach((t) =>
+        t.addEventListener("click", () => {
+          tabs.forEach((x) => x.classList.toggle("active", x === t));
+          const isSignin = t.dataset.tab === "signin";
+          signinForm.style.display = isSignin ? "grid" : "none";
+          signupForm.style.display = isSignin ? "none" : "grid";
+          hideError();
+        })
+      );
+
+      const next = new URLSearchParams(location.search).get("next") || "index.html";
+
+      signinForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        hideError();
+        const btn = signinForm.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = "در حال بررسی...";
+        const res = await Auth.signin(
+          document.getElementById("si-user").value,
+          document.getElementById("si-pass").value
+        );
+        if (res.ok) {
+          location.replace(next);
+        } else {
+          showError(res.error);
+          btn.disabled = false;
+          btn.textContent = "ورود به حساب";
+        }
+      });
+
+      signupForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        hideError();
+        const p1 = document.getElementById("su-pass").value;
+        const p2 = document.getElementById("su-pass2").value;
+        if (p1 !== p2) {
+          showError("رمزهای عبور یکسان نیستند.");
+          return;
+        }
+        const btn = signupForm.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = "در حال ساخت حساب...";
+        const res = await Auth.signup(
+          document.getElementById("su-name").value,
+          document.getElementById("su-user").value,
+          p1
+        );
+        if (res.ok) {
+          location.replace(next);
+        } else {
+          showError(res.error);
+          btn.disabled = false;
+          btn.textContent = "ساخت حساب کاربری";
+        }
+      });
+    });
+  </script>
+
+  <script src="js/auth.js"></script>
+  <script src="js/site-data.js"></script>
+  <script src="js/script.js"></script>
+</body>
+</html>

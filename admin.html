@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>پنل مدیریت | هازارد رول‌پلی</title>
+  <meta name="description" content="پنل مدیریت سایت هازارد رول‌پلی" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
+  <meta name="theme-color" content="#07070d" />
+</head>
+<body>
+
+  <div class="preloader" id="preloader">
+    <div class="preloader-logo"><img src="assets/logo.svg" alt="" width="86" height="86" /></div>
+    <div class="preloader-bar"><span></span></div>
+  </div>
+  <div class="progress-bar" id="progressBar"></div>
+
+  <header class="header">
+    <div class="container navbar">
+      <a href="index.html" class="brand">
+        <img src="assets/logo.svg" alt="Ha4ard" class="brand-logo-img" width="44" height="44" />
+        <span>Ha4ard<small>PANEL</small></span>
+      </a>
+      <nav class="nav-links" id="navLinks">
+        <a href="index.html">مشاهده سایت</a>
+      </nav>
+      <div class="nav-cta">
+        <button class="btn btn-ghost btn-sm" id="panelLogout">خروج</button>
+        <button class="nav-toggle" aria-label="منو" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="mainContent" style="display:none;">
+
+    <section class="page-hero">
+      <div class="container">
+        <span class="overline">🛠 پنل مدیریت</span>
+        <h1>مدیریت هازارد</h1>
+        <p>تنظیمات سرور، اخبار سایت و کاربران از اینجا کنترل می‌شود.</p>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top: 20px;">
+      <div class="container">
+
+        <div class="admin-header reveal">
+          <div class="stat-chips">
+            <span class="stat-chip">👥 کل کاربران: <b id="statUsers">۰</b></span>
+            <span class="stat-chip">🟢 اعضا: <b id="statMembers">۰</b></span>
+            <span class="stat-chip">📰 اخبار فعال: <b id="statNews">۰</b></span>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="resetAll">بازنشانی تنظیمات</button>
+        </div>
+
+        <div class="admin-grid">
+
+          <article class="panel reveal">
+            <h3>⚙️ تنظیمات سایت</h3>
+            <p class="panel-desc">تغییرات بلافاصله روی تمام صفحات سایت اعمال می‌شود.</p>
+            <form id="settings-form" class="form-grid" style="grid-template-columns:1fr;" novalidate>
+              <div class="field full">
+                <label for="set-ip">آی‌پی سرور</label>
+                <input type="text" id="set-ip" dir="ltr" placeholder="play.ha4ard.ir" required />
+              </div>
+              <div class="field full">
+                <label for="set-discord">لینک دیسکورد</label>
+                <input type="url" id="set-discord" dir="ltr" placeholder="https://discord.gg/ha4ard" required />
+              </div>
+              <div class="field full">
+                <label for="set-lead">متن معرفی صفحه اصلی</label>
+                <textarea id="set-lead" style="min-height:100px;" placeholder="متن زیر عنوان اصلی صفحه نخست..." required></textarea>
+              </div>
+              <div class="field full">
+                <button type="submit" class="btn btn-primary">ذخیره تنظیمات</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="panel reveal" style="--delay:80ms">
+            <h3>📰 نوار اخبار</h3>
+            <p class="panel-desc">اخبار نمایش‌داده‌شده در نوار متحرک صفحه اصلی.</p>
+            <ul class="ticker-list" id="tickerList"></ul>
+            <div class="add-row">
+              <input type="text" id="newsInput" placeholder="خبر جدید... مثلاً 🎉 رویداد آخر هفته" maxlength="90" />
+              <button class="btn btn-primary btn-sm" id="addNews" type="button">افزودن</button>
+            </div>
+          </article>
+
+          <article class="panel reveal" style="--delay:160ms">
+            <h3>👥 کاربران</h3>
+            <p class="panel-desc">حساب‌های ثبت‌نام‌شده در سایت؛ حساب مالک قابل حذف نیست.</p>
+            <div style="overflow-x:auto;">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>نام</th>
+                    <th>نام کاربری</th>
+                    <th>نقش</th>
+                    <th>تاریخ عضویت</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="usersBody"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="panel reveal" style="--delay:240ms">
+            <h3>🔑 تغییر رمز مالک</h3>
+            <p class="panel-desc">رمز پیش‌فرض را حتماً تغییر دهید.</p>
+            <form id="pass-form" class="form-grid" style="grid-template-columns:1fr;" novalidate>
+              <div class="field full">
+                <label for="cur-pass">رمز فعلی</label>
+                <input type="password" id="cur-pass" autocomplete="current-password" required />
+              </div>
+              <div class="field full">
+                <label for="new-pass">رمز جدید</label>
+                <input type="password" id="new-pass" autocomplete="new-password" placeholder="حداقل ۶ کاراکتر" required minlength="6" />
+              </div>
+              <div class="field full">
+                <label for="new-pass2">تکرار رمز جدید</label>
+                <input type="password" id="new-pass2" autocomplete="new-password" required />
+              </div>
+              <div class="field full">
+                <button type="submit" class="btn btn-primary">تغییر رمز</button>
+              </div>
+            </form>
+          </article>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <button class="to-top" id="toTop" aria-label="بازگشت به بالا">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+  </button>
+
+  <div class="toast" id="toast"><span></span></div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/script.js"></script>
+  <script>
+    (function() {
+      var $ = function(s, c) { return (c || document).querySelector(s); };
+      var $$ = function(s, c) { return [].slice.call((c || document).querySelectorAll(s)); };
+      var toFa = function(n) { return Number(n).toLocaleString("fa-IR"); };
+
+      var DEFAULTS = {
+        ip: "play.ha4ard.ir",
+        discord: "https://discord.gg/ha4ard",
+        lead: "داستان خودت را در خیابان‌های لس‌سنتوس بساز؛ با اقتصاد واقعی، شغل‌های متنوع و جامعه‌ای حرفه‌ای، تجربه‌ای جدی و متعادل از نقش‌آفرینی را زندگی کن.",
+        ticker: [
+          "🎉 رویداد جمعه‌شب: مسابقه درِیف با جایزه ۵۰۰ هزار دلاری",
+          "🛠 آپدیت ۵.۲ منتشر شد؛ سیستم تیونینگ کامل شد",
+          "👮 استخدام پلیس LSPD آغاز شد",
+          "🏠 حراج املاک مرکز شهر، پایان هفته",
+          "🎁 قرعه‌کشی ویژه اعضای دیسکورد، ۵۰۰۰ نفره"
+        ]
+      };
+
+      var settings;
+
+      function toast(msg) {
+        var t = $("#toast");
+        if (!t) return;
+        t.querySelector("span").textContent = msg;
+        t.classList.add("show");
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(function() { t.classList.remove("show"); }, 2400);
+      }
+
+      function loadSettings() {
+        try {
+          var raw = localStorage.getItem("ha4ard_settings");
+          var parsed = raw ? JSON.parse(raw) : {};
+          var out = {};
+          for (var k in DEFAULTS) out[k] = DEFAULTS[k];
+          for (var k in parsed) out[k] = parsed[k];
+          return out;
+        } catch(e) {
+          var out = {};
+          for (var k in DEFAULTS) out[k] = DEFAULTS[k];
+          return out;
+        }
+      }
+
+      function saveSettings(s) {
+        localStorage.setItem("ha4ard_settings", JSON.stringify(s));
+      }
+
+      function esc(str) {
+        return String(str).replace(/[&<>"]/g, function(c) {
+          return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c];
+        });
+      }
+
+      function renderTicker() {
+        var list = $("#tickerList");
+        if (!list) return;
+        list.innerHTML = "";
+        if (!settings.ticker.length) {
+          list.innerHTML = '<li style="justify-content:center;color:var(--muted);">خبری ثبت نشده است.</li>';
+        } else {
+          settings.ticker.forEach(function(item, i) {
+            var li = document.createElement("li");
+            li.innerHTML = "<span>" + esc(item) + "</span>" +
+              '<button class="row-del" type="button" data-i="' + i + '">حذف</button>';
+            list.appendChild(li);
+          });
+        }
+        var sn = $("#statNews");
+        if (sn) sn.textContent = toFa(settings.ticker.length);
+      }
+
+      function renderUsers() {
+        var u = Auth.users();
+        var tbody = $("#usersBody");
+        if (!tbody) return;
+        tbody.innerHTML = "";
+        var keys = Object.keys(u);
+        var members = 0;
+        keys.forEach(function(k) {
+          if (u[k].role === "member") members++;
+          var tr = document.createElement("tr");
+          tr.innerHTML =
+            "<td>" + esc(u[k].name) + "</td>" +
+            "<td dir='ltr'>" + k + "</td>" +
+            '<td><span class="role-badge ' + u[k].role + '">' + (u[k].role === "owner" ? "مالک" : "عضو") + "</span></td>" +
+            "<td>" + new Date(u[k].created).toLocaleDateString("fa-IR") + "</td>" +
+            "<td>" + (u[k].role === "owner" ? "" : '<button class="row-del" type="button" data-user="' + k + '">حذف</button>') + "</td>";
+          tbody.appendChild(tr);
+        });
+        var su = $("#statUsers");
+        var sm = $("#statMembers");
+        if (su) su.textContent = toFa(keys.length);
+        if (sm) sm.textContent = toFa(members);
+
+        $$("#usersBody .row-del").forEach(function(b) {
+          b.addEventListener("click", function() {
+            if (confirm('حساب «' + b.dataset.user + '» حذف شود؟')) {
+              Auth.deleteUser(b.dataset.user);
+              renderUsers();
+              toast("کاربر حذف شد.");
+            }
+          });
+        });
+      }
+
+      function initAdmin() {
+        var main = $("#mainContent");
+        if (main) main.style.display = "";
+        settings = loadSettings();
+        var si = $("#set-ip");
+        var sd = $("#set-discord");
+        var sl = $("#set-lead");
+        if (si) si.value = settings.ip;
+        if (sd) sd.value = settings.discord;
+        if (sl) sl.value = settings.lead;
+        renderTicker();
+        renderUsers();
+
+        var sf = $("#settings-form");
+        if (sf) sf.addEventListener("submit", function(e) {
+          e.preventDefault();
+          settings.ip = (si ? si.value.trim() : "") || DEFAULTS.ip;
+          settings.discord = (sd ? sd.value.trim() : "") || DEFAULTS.discord;
+          settings.lead = (sl ? sl.value.trim() : "") || DEFAULTS.lead;
+          saveSettings(settings);
+          toast("تنظیمات ذخیره و روی سایت اعمال شد ✓");
+        });
+
+        var tl = $("#tickerList");
+        if (tl) tl.addEventListener("click", function(e) {
+          var b = e.target.closest ? e.target.closest(".row-del") : null;
+          if (!b) return;
+          settings.ticker.splice(Number(b.dataset.i), 1);
+          saveSettings(settings);
+          renderTicker();
+          toast("خبر حذف شد.");
+        });
+
+        var addBtn = $("#addNews");
+        if (addBtn) addBtn.addEventListener("click", function() {
+          var inp = $("#newsInput");
+          var v = inp ? inp.value.trim() : "";
+          if (!v) return;
+          if (settings.ticker.length >= 8) {
+            toast("حداکثر ۸ خبر مجاز است.");
+            return;
+          }
+          settings.ticker.push(v);
+          saveSettings(settings);
+          if (inp) inp.value = "";
+          renderTicker();
+          toast("خبر اضافه شد ✓");
+        });
+
+        var pf = $("#pass-form");
+        if (pf) pf.addEventListener("submit", function(e) {
+          e.preventDefault();
+          var cur = $("#cur-pass").value;
+          var n1 = $("#new-pass").value;
+          var n2 = $("#new-pass2").value;
+          if (n1 !== n2) {
+            toast("رمزهای جدید یکسان نیستند ✕");
+            return;
+          }
+          Auth.changeOwnerPassword(cur, n1).then(function(res) {
+            if (res.ok) { pf.reset(); toast("رمز مالک با موفقیت عوض شد ✓"); }
+            else { toast(res.error); }
+          });
+        });
+
+        var resetBtn = $("#resetAll");
+        if (resetBtn) resetBtn.addEventListener("click", function() {
+          if (!confirm("همه تنظیمات به حالت پیش‌فرض برگردد؟")) return;
+          localStorage.removeItem("ha4ard_settings");
+          settings = loadSettings();
+          if (si) si.value = settings.ip;
+          if (sd) sd.value = settings.discord;
+          if (sl) sl.value = settings.lead;
+          renderTicker();
+          toast("به حالت پیش‌فرض بازگشت.");
+        });
+
+        var logoutBtn = $("#panelLogout");
+        if (logoutBtn) logoutBtn.addEventListener("click", function() {
+          Auth.logout();
+          location.replace("index.html");
+        });
+      }
+
+      function guard() {
+        var s = Auth.session();
+        if (s && s.role === "owner") {
+          initAdmin();
+        } else {
+          location.replace("login.html?next=admin.html");
+        }
+      }
+
+      if (Auth.isLoggedIn() && Auth.isOwner()) {
+        guard();
+      } else {
+        Auth.seed().then(function() {
+          guard();
+        }).catch(function() {
+          location.replace("login.html?next=admin.html");
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>انجمن | هازارد رول‌پلی</title>
+  <meta name="description" content="انجمن گفتگوی بازیکنان هازارد رول‌پلی" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
+  <meta name="theme-color" content="#07070d" />
+</head>
+<body>
+
+  <div class="preloader" id="preloader">
+    <div class="preloader-logo"><img src="assets/logo.svg" alt="" width="86" height="86" /></div>
+    <div class="preloader-bar"><span></span></div>
+  </div>
+  <div class="progress-bar" id="progressBar"></div>
+
+  <header class="header">
+    <div class="container navbar">
+      <a href="index.html" class="brand">
+        <img src="assets/logo.svg" alt="Ha4ard" class="brand-logo-img" width="44" height="44" />
+        <span>Ha4ard<small>RP</small></span>
+      </a>
+      <nav class="nav-links" id="navLinks">
+        <a href="index.html">خانه</a>
+        <a href="store.html">فروشگاه</a>
+        <a href="rules.html">قوانین</a>
+        <a href="forum.html" class="active">انجمن</a>
+        <a href="apply.html">درخواست وایت‌لیست</a>
+        <a href="about.html">درباره ما</a>
+      </nav>
+      <div class="nav-cta">
+        <div class="auth-slot" id="authSlot"></div>
+        <a href="https://discord.gg/ha4ard" target="_blank" rel="noopener" class="btn btn-primary btn-sm">دیسکورد</a>
+        <button class="nav-toggle" aria-label="منو" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <span class="overline">💬 انجمن</span>
+        <h1>انجمن گفتگو</h1>
+        <p>با دیگر بازیکنان گفتگو کنید، پیشنهاد بدهید و مشکلات را گزارش کنید.</p>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:20px;">
+      <div class="container">
+
+        <div id="forumView"></div>
+
+      </div>
+    </section>
+  </main>
+
+  <button class="to-top" id="toTop" aria-label="بازگشت به بالا">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+  </button>
+
+  <div class="toast" id="toast"><span></span></div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/script.js"></script>
+  <script src="js/forum.js"></script>
+  <script>
+  (function() {
+    var V = document.getElementById("forumView");
+    var toastTimer;
+
+    function toast(msg) {
+      var t = document.getElementById("toast");
+      if (!t) return;
+      t.querySelector("span").textContent = msg;
+      t.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function() { t.classList.remove("show"); }, 2400);
+    }
+
+    function renderList(filter, q) {
+      filter = filter || "all";
+      q = q || "";
+      var threads = Forum.search(q, filter);
+      var s = Auth.session();
+      var isOwner = s && s.role === "owner";
+      var st = Forum.stats();
+
+      var catsHtml = '<div class="forum-cats">';
+      catsHtml += '<button class="forum-cat' + (filter === "all" ? " active" : "") + '" data-cat="all">همه <small>' + st.threads + '</small></button>';
+      for (var i = 0; i < Forum.CATS.length; i++) {
+        var c = Forum.CATS[i];
+        var cnt = 0;
+        var all = Forum.load();
+        for (var j = 0; j < all.length; j++) { if (all[j].category === c.id) cnt++; }
+        catsHtml += '<button class="forum-cat' + (filter === c.id ? " active" : "") + '" data-cat="' + c.id + '">' + c.icon + ' ' + c.label + ' <small>' + cnt + '</small></button>';
+      }
+      catsHtml += '</div>';
+
+      var toolbarHtml = '<div class="forum-toolbar">' +
+        '<div class="forum-search-box">' +
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+        '<input type="text" id="forumSearch" placeholder="جستجو..." value="' + Forum.esc(q) + '" />' +
+        '</div>' +
+        (s ? '<a href="#new" class="btn btn-primary btn-sm">+ موضوع جدید</a>' : '<a href="login.html?next=forum.html" class="btn btn-ghost btn-sm">ورود برای ارسال</a>') +
+        '</div>';
+
+      var threadsHtml = '<div class="forum-threads">';
+      if (threads.length === 0) {
+        threadsHtml += '<div class="forum-empty">';
+        threadsHtml += '<div class="forum-empty-icon">📭</div>';
+        threadsHtml += '<p>موضوعی یافت نشد.</p>';
+        threadsHtml += '</div>';
+      } else {
+        for (var i = 0; i < threads.length; i++) {
+          var t = threads[i];
+          var cat = Forum.catInfo(t.category);
+          var replyCount = t.replies.length;
+          threadsHtml += '<a href="#thread-' + t.id + '" class="forum-row' + (t.pinned ? " pinned" : "") + '">';
+          threadsHtml += '<div class="forum-row-left">';
+          if (t.pinned) threadsHtml += '<span class="forum-pin-icon" title="سنجاق‌شده">📌</span>';
+          threadsHtml += '<div class="forum-row-body">';
+          threadsHtml += '<h4 class="forum-row-title">' + Forum.esc(t.title) + '</h4>';
+          threadsHtml += '<div class="forum-row-meta">';
+          threadsHtml += '<span class="forum-cat-badge">' + cat.icon + ' ' + cat.label + '</span>';
+          threadsHtml += '<span>توسط <b>' + Forum.esc(t.authorName) + '</b></span>';
+          threadsHtml += '<span>' + Forum.timeAgo(t.created) + '</span>';
+          threadsHtml += '</div></div></div>';
+          threadsHtml += '<div class="forum-row-right">';
+          threadsHtml += '<div class="forum-reply-count">';
+          threadsHtml += '<span class="forum-reply-num">' + replyCount + '</span>';
+          threadsHtml += '<span class="forum-reply-label">' + (replyCount === 1 ? "پاسخ" : "پاسخ") + '</span>';
+          threadsHtml += '</div></div>';
+          threadsHtml += '</a>';
+        }
+      }
+      threadsHtml += '</div>';
+
+      var statBar = '<div class="forum-stats">' +
+        '<div class="forum-stat"><span class="forum-stat-num">' + st.threads + '</span> موضوع</div>' +
+        '<div class="forum-stat"><span class="forum-stat-num">' + st.replies + '</span> پاسخ</div>' +
+        '</div>';
+
+      V.innerHTML = statBar + catsHtml + toolbarHtml + threadsHtml;
+
+      document.querySelectorAll(".forum-cat").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          var hash = btn.dataset.cat === "all" ? "#" : "#cat-" + btn.dataset.cat;
+          location.hash = hash;
+        });
+      });
+
+      var searchInput = document.getElementById("forumSearch");
+      var searchTimer;
+      if (searchInput) {
+        searchInput.addEventListener("input", function() {
+          clearTimeout(searchTimer);
+          searchTimer = setTimeout(function() {
+            location.hash = "#search-" + encodeURIComponent(searchInput.value.trim()) + (filter !== "all" ? "-" + filter : "");
+          }, 400);
+        });
+      }
+    }
+
+    function renderThread(id) {
+      var t = Forum.getThread(id);
+      if (!t) { location.hash = "#"; return; }
+      var s = Auth.session();
+      var isOwner = s && s.role === "owner";
+      var cat = Forum.catInfo(t.category);
+
+      var html = '<div class="forum-thread">';
+      html += '<a href="#" class="forum-back">← بازگشت به لیست</a>';
+      html += '<div class="thread-header">';
+      html += '<div class="thread-header-top">';
+      html += '<span class="forum-cat-badge lg">' + cat.icon + ' ' + cat.label + '</span>';
+      if (t.pinned) html += '<span class="forum-pin-badge">📌 سنجاق‌شده</span>';
+      html += '</div>';
+      html += '<h2 class="thread-title">' + Forum.esc(t.title) + '</h2>';
+      html += '<div class="thread-meta">';
+      html += '<span class="thread-author">';
+      html += '<span class="thread-avatar">' + Forum.esc(t.authorName.charAt(0).toUpperCase()) + '</span>';
+      html += '<b>' + Forum.esc(t.authorName) + '</b>';
+      html += '</span>';
+      html += '<span>' + Forum.timeAgo(t.created) + '</span>';
+      html += '</div></div>';
+
+      html += '<div class="thread-body">' + Forum.esc(t.body).replace(/\n/g, '<br>') + '</div>';
+
+      if (isOwner) {
+        html += '<div class="thread-actions">';
+        html += '<button class="btn btn-ghost btn-sm" id="btnPin">' + (t.pinned ? '📌 برداشتن سنجاق' : '📌 سنجاق کردن') + '</button>';
+        html += '<button class="btn btn-ghost btn-sm" id="btnDel" style="color:var(--danger)">' + '🗑 حذف موضوع' + '</button>';
+        html += '</div>';
+      }
+
+      html += '<div class="thread-replies">';
+      html += '<h3 class="replies-title">پاسخ‌ها <small>' + t.replies.length + '</small></h3>';
+
+      if (t.replies.length === 0) {
+        html += '<div class="forum-empty" style="padding:30px 0">';
+        html += '<p style="color:var(--muted)">هنوز پاسخی ثبت نشده است.</p>';
+        html += '</div>';
+      } else {
+        for (var i = 0; i < t.replies.length; i++) {
+          var r = t.replies[i];
+          html += '<div class="reply-card">';
+          html += '<div class="reply-top">';
+          html += '<span class="thread-author">';
+          html += '<span class="thread-avatar sm">' + Forum.esc(r.authorName.charAt(0).toUpperCase()) + '</span>';
+          html += '<b>' + Forum.esc(r.authorName) + '</b>';
+          html += '</span>';
+          html += '<span class="reply-time">' + Forum.timeAgo(r.created) + '</span>';
+          if (isOwner) {
+            html += '<button class="reply-del" data-rid="' + r.id + '" title="حذف پاسخ">✕</button>';
+          }
+          html += '</div>';
+          html += '<div class="reply-body">' + Forum.esc(r.body).replace(/\n/g, '<br>') + '</div>';
+          html += '</div>';
+        }
+      }
+      html += '</div>';
+
+      if (s) {
+        html += '<div class="reply-form">';
+        html += '<h4>ارسال پاسخ</h4>';
+        html += '<textarea id="replyInput" placeholder="پاسخ خود را بنویسید..." rows="4" maxlength="2000"></textarea>';
+        html += '<div class="reply-form-footer">';
+        html += '<span class="char-count" id="replyCount">0 / 2000</span>';
+        html += '<button class="btn btn-primary btn-sm" id="btnReply">ارسال پاسخ</button>';
+        html += '</div></div>';
+      } else {
+        html += '<div class="reply-form">';
+        html += '<a href="login.html?next=forum.html%23thread-' + t.id + '" class="btn btn-ghost">ورود برای ارسال پاسخ</a>';
+        html += '</div>';
+      }
+
+      html += '</div>';
+      V.innerHTML = html;
+
+      var pinBtn = document.getElementById("btnPin");
+      if (pinBtn) pinBtn.addEventListener("click", function() {
+        Forum.togglePin(id);
+        renderThread(id);
+        toast(t.pinned ? "سنجاق برداشته شد." : "موضوع سنجاق شد.");
+      });
+
+      var delBtn = document.getElementById("btnDel");
+      if (delBtn) delBtn.addEventListener("click", function() {
+        if (confirm("این موضوع حذف شود؟")) {
+          Forum.deleteThread(id);
+          location.hash = "#";
+          toast("موضوع حذف شد.");
+        }
+      });
+
+      document.querySelectorAll(".reply-del").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          if (confirm("این پاسخ حذف شود؟")) {
+            Forum.deleteReply(id, btn.dataset.rid);
+            renderThread(id);
+            toast("پاسخ حذف شد.");
+          }
+        });
+      });
+
+      var replyInput = document.getElementById("replyInput");
+      var replyCount = document.getElementById("replyCount");
+      if (replyInput && replyCount) {
+        replyInput.addEventListener("input", function() {
+          replyCount.textContent = replyInput.value.length + " / 2000";
+        });
+      }
+
+      var btnReply = document.getElementById("btnReply");
+      if (btnReply) btnReply.addEventListener("click", function() {
+        var body = replyInput.value.trim();
+        if (!body) { toast("متن پاسخ خالی است."); return; }
+        Forum.addReply(id, body, s);
+        renderThread(id);
+        toast("پاسخ ارسال شد ✓");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    }
+
+    function renderNew() {
+      var s = Auth.session();
+      if (!s) { location.hash = "#"; return; }
+
+      var html = '<div class="forum-new">';
+      html += '<a href="#" class="forum-back">← بازگشت به لیست</a>';
+      html += '<h2>موضوع جدید</h2>';
+      html += '<form id="newThreadForm" class="form-grid" style="grid-template-columns:1fr;" novalidate>';
+      html += '<div class="field full">';
+      html += '<label for="threadTitle">عنوان</label>';
+      html += '<input type="text" id="threadTitle" placeholder="عنوان موضوع..." required maxlength="120" />';
+      html += '<span class="char-count" id="titleCount">0 / 120</span>';
+      html += '</div>';
+      html += '<div class="field full">';
+      html += '<label for="threadCat">دسته‌بندی</label>';
+      html += '<select id="threadCat">';
+      for (var i = 0; i < Forum.CATS.length; i++) {
+        html += '<option value="' + Forum.CATS[i].id + '">' + Forum.CATS[i].icon + ' ' + Forum.CATS[i].label + '</option>';
+      }
+      html += '</select></div>';
+      html += '<div class="field full">';
+      html += '<label for="threadBody">متن</label>';
+      html += '<textarea id="threadBody" placeholder="متن موضوع خود را بنویسید..." rows="6" maxlength="2000" required></textarea>';
+      html += '<span class="char-count" id="bodyCount">0 / 2000</span>';
+      html += '</div>';
+      html += '<div class="field full">';
+      html += '<button type="submit" class="btn btn-primary">انتشار موضوع</button>';
+      html += '</div></form></div>';
+
+      V.innerHTML = html;
+
+      var titleInput = document.getElementById("threadTitle");
+      var bodyInput = document.getElementById("threadBody");
+      var titleCount = document.getElementById("titleCount");
+      var bodyCount = document.getElementById("bodyCount");
+
+      if (titleInput && titleCount) titleInput.addEventListener("input", function() { titleCount.textContent = titleInput.value.length + " / 120"; });
+      if (bodyInput && bodyCount) bodyInput.addEventListener("input", function() { bodyCount.textContent = bodyInput.value.length + " / 2000"; });
+
+      document.getElementById("newThreadForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        var title = titleInput.value.trim();
+        var body = bodyInput.value.trim();
+        var cat = document.getElementById("threadCat").value;
+        if (!title) { toast("عنوان را وارد کنید."); return; }
+        if (!body) { toast("متن را وارد کنید."); return; }
+        var tid = Forum.createThread(title, body, cat, s);
+        location.hash = "#thread-" + tid;
+        toast("موضوع منتشر شد ✓");
+      });
+    }
+
+    function route() {
+      var h = location.hash || "#";
+      if (h === "#new") {
+        renderNew();
+      } else if (h.indexOf("#thread-") === 0) {
+        renderThread(h.replace("#thread-", ""));
+      } else if (h.indexOf("#cat-") === 0) {
+        renderList(h.replace("#cat-", ""));
+      } else if (h.indexOf("#search-") === 0) {
+        var rest = decodeURIComponent(h.replace("#search-", ""));
+        var parts = rest.split("-");
+        var q = parts[0] || "";
+        var cat = parts.length > 1 ? parts[parts.length - 1] : "all";
+        var catIds = [];
+        for (var i = 0; i < Forum.CATS.length; i++) catIds.push(Forum.CATS[i].id);
+        if (catIds.indexOf(cat) === -1) { cat = "all"; q = rest; }
+        renderList(cat, q);
+      } else {
+        renderList("all", "");
+      }
+    }
+
+    window.addEventListener("hashchange", route);
+    Forum.seed();
+    route();
+  })();
+  </script>
+</body>
+</html>
